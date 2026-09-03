@@ -113,7 +113,7 @@ model Tenant {
   categories    Category[]
   products      Product[]
   productImages ProductImage[]
-  customers     Customer[]
+  customerTenants CustomerTenant[]
   sales         Sale[]
   saleItems     SaleItem[]
   orders        Order[]
@@ -150,7 +150,6 @@ model User {
   auditLogs    AuditLog[]
 
   @@unique([tenantId, email])
-  @@unique([scope, email])
   @@index([tenantId, role])
   @@index([tenantId, status])
   @@index([email])
@@ -180,6 +179,8 @@ model Customer {
   orders   Order[]
   payments Payment[]
 
+  customerTenants CustomerTenant[]
+
   @@unique([email])
   @@index([isActive])
   @@map("customers")
@@ -195,6 +196,7 @@ model CustomerTenant {
 
   @@unique([tenantId, customerId])
   @@index([tenantId])
+  @@index([customerId])
   @@map("customer_tenants")
 }
 
@@ -431,8 +433,8 @@ model Payment {
 
 model AuditLog {
   id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId  String?
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   userId    String?
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   entityType String
